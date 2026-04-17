@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/codebuddy/static/css/main.b8412fc4.css",
+    "main.js": "/codebuddy/static/js/main.83b37982.js",
+    "static/js/453.8dc457a4.chunk.js": "/codebuddy/static/js/453.8dc457a4.chunk.js",
+    "index.html": "/codebuddy/index.html",
+    "main.b8412fc4.css.map": "/codebuddy/static/css/main.b8412fc4.css.map",
+    "main.83b37982.js.map": "/codebuddy/static/js/main.83b37982.js.map",
+    "453.8dc457a4.chunk.js.map": "/codebuddy/static/js/453.8dc457a4.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.b8412fc4.css",
+    "static/js/main.83b37982.js"
+  ]
+}
