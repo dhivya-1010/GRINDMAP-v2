@@ -191,110 +191,58 @@ function DashboardPage() {
 
       // ================= LEETCODE =================
 
-      if (usernames.leetcode) {
+if (usernames.leetcode) {
 
-        const lcRes =
-          await fetch(
-            `https://leetcode-api-faisalshohag.vercel.app/${usernames.leetcode}`
-          );
+  const lcRes =
+    await fetch(
 
-        const lcData =
-          await lcRes.json();
+      `http://localhost:3001/api/leetcode/${usernames.leetcode}`
+    );
 
-        newData.leetcode = {
+  const lcData =
+    await lcRes.json();
 
-          totalSolved:
-            lcData.totalSolved ||
-            0,
+  newData.leetcode = {
 
-          easySolved:
-            lcData.easySolved ||
-            0,
+    totalSolved:
+      lcData.totalSolved || 0,
 
-          mediumSolved:
-            lcData.mediumSolved ||
-            0,
+    easySolved:
+      lcData.easySolved || 0,
 
-          hardSolved:
-            lcData.hardSolved ||
-            0,
-        };
-      }
+    mediumSolved:
+      lcData.mediumSolved || 0,
+
+    hardSolved:
+      lcData.hardSolved || 0,
+  };
+}
 
       // ================= CODEFORCES =================
 
-      if (usernames.codeforces) {
+if (usernames.codeforces) {
 
-        // USER INFO
+  const cfRes =
+    await fetch(
 
-        const cfRes =
-          await fetch(
-            `https://codeforces.com/api/user.info?handles=${usernames.codeforces}`
-          );
+      `http://localhost:3001/api/codeforces/${usernames.codeforces}`
+    );
 
-        const cfJson =
-          await cfRes.json();
+  const cfData =
+    await cfRes.json();
 
-        const user =
-          cfJson.result[0];
+  newData.codeforces = {
 
-        // USER SUBMISSIONS
+    rating:
+      cfData.rating || 0,
 
-        const subRes =
-          await fetch(
-            `https://codeforces.com/api/user.status?handle=${usernames.codeforces}`
-          );
+    solved:
+      cfData.solved || 0,
 
-        const subJson =
-          await subRes.json();
-
-        // UNIQUE SOLVED
-
-        const solvedSet =
-          new Set();
-
-        subJson.result.forEach(
-          (sub) => {
-
-            if (
-              sub.verdict ===
-              "OK"
-            ) {
-
-              solvedSet.add(
-                `${sub.problem.contestId}-${sub.problem.index}`
-              );
-
-            }
-          }
-        );
-
-        newData.codeforces = {
-
-          rating:
-            user.rating || 0,
-
-          solved:
-            solvedSet.size || 0,
-
-          todaySubmissions:
-            subJson.result.filter(
-              (sub) => {
-
-                const today =
-                  new Date().toDateString();
-
-                return (
-                  new Date(
-                    sub.creationTimeSeconds *
-                      1000
-                  ).toDateString() ===
-                  today
-                );
-              }
-            ).length,
-        };
-      }
+    todaySubmissions:
+      cfData.todaySubmissions || 0,
+  };
+}
 
       // ================= SAVE =================
 
