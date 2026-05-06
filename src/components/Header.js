@@ -34,9 +34,13 @@ function Header() {
           <Link to="/platforms" className="nav-link" onClick={() => setMenuOpen(false)}>
             Platforms
           </Link>
+          <Link to="/checkout" className="nav-link"onClick={() => setMenuOpen(false)}>
+           Checkout
+          </Link>
           <button className="logout-btn" onClick={handleLogout}>
             Logout
           </button>
+          
         </nav>
 
         <button className="menu-toggle" onClick={toggleMenu}>

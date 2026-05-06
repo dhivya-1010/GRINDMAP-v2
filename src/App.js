@@ -6,6 +6,7 @@ import LoginPage from "./pages/LoginPage";
 import DashboardPage from "./pages/DashboardPage";
 import PlatformsPage from "./pages/PlatformsPage";
 import ProgressPage from "./pages/ProgressPage";
+import CheckoutPage from "./pages/CheckoutPage";
 
 function ProtectedRoute({ children }) {
   const isAuthenticated = true;
@@ -54,6 +55,17 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+  path="/checkout"
+  element={
+    <ProtectedRoute>
+      <>
+        <Header />
+        <CheckoutPage />
+      </>
+    </ProtectedRoute>
+  }
+/>
 
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>

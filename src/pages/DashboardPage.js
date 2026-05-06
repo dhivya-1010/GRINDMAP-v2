@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+
+import { sendStreakMail }
+from "../services/emailService";
+
 import TodayActivity from "../components/TodayActivity";
 import ProblemStats from "../components/ProblemStats";
 import StreakAlert from "../components/StreakAlert";
+
 import "./DashboardPage.css";
 
 function DashboardPage() {
@@ -26,6 +31,7 @@ function DashboardPage() {
     useState("");
 
   const platforms = [
+
     {
       key: "github",
       name: "GitHub",
@@ -56,7 +62,6 @@ function DashboardPage() {
       setUsernames(
         JSON.parse(savedUsernames)
       );
-
     }
 
     const savedPlatformData =
@@ -69,7 +74,6 @@ function DashboardPage() {
       setPlatformData(
         JSON.parse(savedPlatformData)
       );
-
     }
 
   }, []);
@@ -93,7 +97,9 @@ function DashboardPage() {
     );
 
     localStorage.setItem(
+
       "usernames",
+
       JSON.stringify(
         updatedUsernames
       )
@@ -130,7 +136,6 @@ function DashboardPage() {
         url,
         "_blank"
       );
-
     }
   };
 
@@ -197,7 +202,6 @@ function DashboardPage() {
 
           apiUrl =
             `https://leetcode-api-faisalshohag.vercel.app/${usernames.leetcode}`;
-
         }
 
         // VERCEL
@@ -206,7 +210,6 @@ function DashboardPage() {
 
           apiUrl =
             `/api/leetcode?username=${usernames.leetcode}`;
-
         }
 
         const lcRes =
@@ -282,7 +285,6 @@ function DashboardPage() {
               solvedSet.add(
                 `${sub.problem.contestId}-${sub.problem.index}`
               );
-
             }
           }
         );
@@ -322,7 +324,9 @@ function DashboardPage() {
       );
 
       localStorage.setItem(
+
         "platformData",
+
         JSON.stringify(
           newData
         )
@@ -364,7 +368,6 @@ function DashboardPage() {
           streakData.count =
             (parsed.count || 0) +
             1;
-
         }
 
         else {
@@ -375,11 +378,26 @@ function DashboardPage() {
       }
 
       localStorage.setItem(
+
         "grindmapStreak",
+
         JSON.stringify(
           streakData
         )
       );
+
+      // ================= SEND EMAIL =================
+
+      await sendStreakMail(
+
+        "Dhivya",
+
+        "dhivya.v2024cse@sece.ac.in",
+
+        streakData.count
+      );
+
+      // ================= NAVIGATE =================
 
       navigate(
         "/platforms"
