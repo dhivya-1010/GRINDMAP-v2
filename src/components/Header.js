@@ -25,10 +25,11 @@ function Header() {
         </div>
 
         <nav className={`nav-menu ${menuOpen ? "active" : ""}`}>
-          <Link to="/dashboard" className="nav-link" onClick={() => setMenuOpen(false)}>
+          
+          <Link to="/progress" className="nav-link" onClick={() => setMenuOpen(false)}>
             Dashboard
           </Link>
-          <Link to="/progress" className="nav-link" onClick={() => setMenuOpen(false)}>
+          <Link to="/dashboard" className="nav-link" onClick={() => setMenuOpen(false)}>
             Progress
           </Link>
           <Link to="/platforms" className="nav-link" onClick={() => setMenuOpen(false)}>

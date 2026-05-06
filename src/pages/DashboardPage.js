@@ -1,425 +1,44 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React,
+{
+  useState,
+  useEffect,
+} from "react";
 
-import { sendStreakMail }
-from "../services/emailService";
+import CircularProgress
+from "../components/CircularProgress";
 
-import TodayActivity from "../components/TodayActivity";
-import ProblemStats from "../components/ProblemStats";
-import StreakAlert from "../components/StreakAlert";
+import ActivityHeatmap
+from "../components/ActivityHeatmap";
 
-import "./DashboardPage.css";
+import "./ProgressPage.css";
 
-function DashboardPage() {
+function ProgressPage() {
 
-  const navigate = useNavigate();
-
-  const [usernames, setUsernames] =
-    useState({
-      github: "",
-      leetcode: "",
-      codeforces: "",
-    });
-
-  const [platformData, setPlatformData] =
+  const [platformData,
+    setPlatformData] =
     useState({});
 
-  const [loading, setLoading] =
-    useState(false);
-
-  const [error, setError] =
-    useState("");
-
-  const platforms = [
-
-    {
-      key: "github",
-      name: "GitHub",
-    },
-
-    {
-      key: "leetcode",
-      name: "LeetCode",
-    },
-
-    {
-      key: "codeforces",
-      name: "Codeforces",
-    },
-  ];
-
-  // ================= LOAD SAVED DATA =================
-
   useEffect(() => {
-
-    const savedUsernames =
-      localStorage.getItem(
-        "usernames"
-      );
-
-    if (savedUsernames) {
-
-      setUsernames(
-        JSON.parse(savedUsernames)
-      );
-    }
 
     const savedPlatformData =
       localStorage.getItem(
         "platformData"
       );
 
-    if (savedPlatformData) {
+    if (
+      savedPlatformData
+    ) {
 
       setPlatformData(
-        JSON.parse(savedPlatformData)
+        JSON.parse(
+          savedPlatformData
+        )
       );
     }
 
   }, []);
 
-  // ================= HANDLE INPUT CHANGE =================
-
-  const handleChange = (
-    key,
-    value
-  ) => {
-
-    const updatedUsernames = {
-
-      ...usernames,
-
-      [key]: value,
-    };
-
-    setUsernames(
-      updatedUsernames
-    );
-
-    localStorage.setItem(
-
-      "usernames",
-
-      JSON.stringify(
-        updatedUsernames
-      )
-    );
-  };
-
-  // ================= REDIRECT =================
-
-  const handleRedirect = (
-    platformKey
-  ) => {
-
-    const urls = {
-
-      github:
-        `https://github.com/${usernames.github}`,
-
-      leetcode:
-        `https://leetcode.com/${usernames.leetcode}`,
-
-      codeforces:
-        `https://codeforces.com/profile/${usernames.codeforces}`,
-    };
-
-    const url =
-      urls[platformKey];
-
-    if (
-      url &&
-      usernames[platformKey]
-    ) {
-
-      window.open(
-        url,
-        "_blank"
-      );
-    }
-  };
-
-  // ================= FETCH DATA =================
-
-  const fetchAll = async () => {
-
-    setLoading(true);
-
-    setError("");
-
-    try {
-
-      const newData = {};
-
-      // ================= GITHUB =================
-
-      if (usernames.github) {
-
-        const githubRes =
-          await fetch(
-            `https://api.github.com/users/${usernames.github}`
-          );
-
-        const githubData =
-          await githubRes.json();
-
-        newData.github = {
-
-          publicRepos:
-            githubData.public_repos ||
-            0,
-
-          followers:
-            githubData.followers ||
-            0,
-
-          heatmap: [
-            {
-              date:
-                new Date()
-                  .toISOString()
-                  .split("T")[0],
-
-              count: 5,
-            },
-          ],
-        };
-      }
-
-      // ================= LEETCODE =================
-
-      if (usernames.leetcode) {
-
-        let apiUrl = "";
-
-        // LOCALHOST
-
-        if (
-          window.location
-            .hostname ===
-          "localhost"
-        ) {
-
-          apiUrl =
-            `https://leetcode-api-faisalshohag.vercel.app/${usernames.leetcode}`;
-        }
-
-        // VERCEL
-
-        else {
-
-          apiUrl =
-            `/api/leetcode?username=${usernames.leetcode}`;
-        }
-
-        const lcRes =
-          await fetch(
-            apiUrl
-          );
-
-        const lcData =
-          await lcRes.json();
-
-        newData.leetcode = {
-
-          totalSolved:
-            lcData.totalSolved ||
-            0,
-
-          easySolved:
-            lcData.easySolved ||
-            0,
-
-          mediumSolved:
-            lcData.mediumSolved ||
-            0,
-
-          hardSolved:
-            lcData.hardSolved ||
-            0,
-        };
-      }
-
-      // ================= CODEFORCES =================
-
-      if (
-        usernames.codeforces
-      ) {
-
-        // USER INFO
-
-        const cfRes =
-          await fetch(
-            `https://codeforces.com/api/user.info?handles=${usernames.codeforces}`
-          );
-
-        const cfJson =
-          await cfRes.json();
-
-        const user =
-          cfJson.result[0];
-
-        // USER SUBMISSIONS
-
-        const subRes =
-          await fetch(
-            `https://codeforces.com/api/user.status?handle=${usernames.codeforces}`
-          );
-
-        const subJson =
-          await subRes.json();
-
-        // UNIQUE SOLVED
-
-        const solvedSet =
-          new Set();
-
-        subJson.result.forEach(
-          (sub) => {
-
-            if (
-              sub.verdict ===
-              "OK"
-            ) {
-
-              solvedSet.add(
-                `${sub.problem.contestId}-${sub.problem.index}`
-              );
-            }
-          }
-        );
-
-        newData.codeforces = {
-
-          rating:
-            user.rating || 0,
-
-          solved:
-            solvedSet.size ||
-            0,
-
-          todaySubmissions:
-            subJson.result.filter(
-              (sub) => {
-
-                const today =
-                  new Date().toDateString();
-
-                return (
-                  new Date(
-                    sub.creationTimeSeconds *
-                      1000
-                  ).toDateString() ===
-                  today
-                );
-              }
-            ).length,
-        };
-      }
-
-      // ================= SAVE DATA =================
-
-      setPlatformData(
-        newData
-      );
-
-      localStorage.setItem(
-
-        "platformData",
-
-        JSON.stringify(
-          newData
-        )
-      );
-
-      // ================= STREAK =================
-
-      const today =
-        new Date()
-          .toISOString()
-          .split("T")[0];
-
-      let streakData = {
-
-        count: 1,
-
-        lastDate: today,
-      };
-
-      const savedStreak =
-        localStorage.getItem(
-          "grindmapStreak"
-        );
-
-      if (
-        savedStreak
-      ) {
-
-        const parsed =
-          JSON.parse(
-            savedStreak
-          );
-
-        if (
-          parsed.lastDate !==
-          today
-        ) {
-
-          streakData.count =
-            (parsed.count || 0) +
-            1;
-        }
-
-        else {
-
-          streakData.count =
-            parsed.count;
-        }
-      }
-
-      localStorage.setItem(
-
-        "grindmapStreak",
-
-        JSON.stringify(
-          streakData
-        )
-      );
-
-      // ================= SEND EMAIL =================
-
-      await sendStreakMail(
-
-        "Dhivya",
-
-        "dhivya.v2024cse@sece.ac.in",
-
-        streakData.count
-      );
-
-      // ================= NAVIGATE =================
-
-      navigate(
-        "/platforms"
-      );
-
-    }
-
-    catch (err) {
-
-      console.error(
-        err
-      );
-
-      setError(
-        "Failed to fetch platform data"
-      );
-    }
-
-    setLoading(false);
-  };
-
-  // ================= STATS =================
+  // ================= TOTAL =================
 
   const totalSolved =
 
@@ -432,140 +51,131 @@ function DashboardPage() {
   const totalProblems =
     4000;
 
-  const todayISO =
-    new Date()
-      .toISOString()
-      .split("T")[0];
-
-  const todayGithubActivity =
-
-    platformData.github
-      ?.heatmap?.find(
-        (d) =>
-          d.date ===
-          todayISO
-      )?.count || 0;
-
-  const todayCodeforces =
-
-    platformData.codeforces
-      ?.todaySubmissions || 0;
-
   return (
 
-    <div className="dashboard-page">
-
-      <StreakAlert />
+    <div className="progress-page">
 
       <h1>
-        Dashboard
+        Overall Progress
       </h1>
 
-      {/* ================= USERNAME INPUTS ================= */}
+      <p className="progress-subtitle">
 
-      <div className="username-inputs">
+        Visualize your coding
+        journey and achievements
 
-        <h2>
-          Enter Usernames
-        </h2>
-
-        {platforms.map(
-          (plat) => (
-
-            <div
-              key={plat.key}
-              className="input-group"
-            >
-
-              <label>
-                {plat.name}
-              </label>
-
-              <input
-                type="text"
-
-                value={
-                  usernames[
-                    plat.key
-                  ]
-                }
-
-                onChange={(e) =>
-                  handleChange(
-                    plat.key,
-                    e.target.value
-                  )
-                }
-
-                placeholder={`Enter ${plat.name} username`}
-              />
-
-            </div>
-          )
-        )}
-
-        <button
-          onClick={fetchAll}
-          disabled={
-            loading
-          }
-        >
-
-          {loading
-            ? "Loading..."
-            : "Fetch All Platforms"}
-
-        </button>
-
-        {error && (
-
-          <p className="error">
-
-            {error}
-
-          </p>
-
-        )}
-
-      </div>
-
-      {/* ================= TODAY ACTIVITY ================= */}
-
-      <TodayActivity
-
-        github={
-          todayGithubActivity
-        }
-
-        leetcode={
-          platformData.leetcode
-            ?.totalSolved || 0
-        }
-
-        codeforces={
-          todayCodeforces
-        }
-
-        onRedirect={
-          handleRedirect
-        }
-      />
+      </p>
 
       {/* ================= PROBLEM STATS ================= */}
 
-      <ProblemStats
+      <div
+        className="overall-progress-section"
+      >
 
-        solved={
-          totalSolved
-        }
+        <h2>
+          Total Problems Solved
+        </h2>
 
-        total={
-          totalProblems
-        }
-      />
+        <CircularProgress
+
+          solved={
+            totalSolved
+          }
+
+          goal={
+            totalProblems
+          }
+
+          color="#00f5a0"
+
+          size="large"
+        />
+
+        <h3
+          style={{
+
+            textAlign:
+              "center",
+
+            marginTop:
+              "20px",
+
+            color:
+              "#00f5a0",
+
+            fontSize:
+              "28px",
+          }}
+        >
+
+          {totalSolved}
+          {" / "}
+          {totalProblems}
+
+        </h3>
+
+        <p
+          style={{
+
+            textAlign:
+              "center",
+
+            marginTop:
+              "10px",
+
+            opacity: 0.7,
+          }}
+        >
+
+          Problems solved
+          across platforms
+
+        </p>
+
+      </div>
+
+      {/* ================= HEATMAP ================= */}
+
+      {platformData.github
+        ?.heatmap &&
+      platformData.github
+        .heatmap.length > 0 ? (
+
+        <div
+          className="heatmap-section"
+        >
+
+          <h2>
+            GitHub Activity
+            Heatmap
+          </h2>
+
+          <ActivityHeatmap
+            data={
+              platformData.github
+                .heatmap
+            }
+          />
+
+        </div>
+
+      ) : (
+
+        <div
+          className="no-data"
+        >
+
+          <p>
+            No GitHub activity
+            data available
+          </p>
+
+        </div>
+
+      )}
 
     </div>
   );
 }
 
-export default DashboardPage;
+export default ProgressPage;

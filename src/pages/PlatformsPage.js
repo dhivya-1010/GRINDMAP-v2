@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import PlatformCard from "../components/PlatformCard";
 import "./PlatformsPage.css";
+import ProblemStats from "../components/ProblemStats";
 
 function PlatformsPage() {
   const [usernames, setUsernames] = useState({
