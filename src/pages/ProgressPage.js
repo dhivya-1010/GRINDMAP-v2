@@ -142,36 +142,52 @@ function DashboardPage() {
 
       if (usernames.github) {
 
-        const githubRes =
-          await fetch(
-            `https://api.github.com/users/${usernames.github}`
-          );
+  const githubRes =
+    await fetch(
 
-        const githubData =
-          await githubRes.json();
+      `http://localhost:3001/api/github/${usernames.github}`
+    );
 
-        newData.github = {
+  const githubData =
+    await githubRes.json();
 
-          publicRepos:
-            githubData.public_repos ||
-            0,
+  newData.github = {
 
-          followers:
-            githubData.followers ||
-            0,
+    publicRepos:
+      githubData.publicRepos || 0,
 
-          heatmap: [
-            {
-              date:
-                new Date()
-                  .toISOString()
-                  .split("T")[0],
+    followers:
+      githubData.followers || 0,
 
-              count: 5,
-            },
-          ],
-        };
-      }
+    heatmap: [
+
+      {
+        date: "2026-05-01",
+        count: 2,
+      },
+
+      {
+        date: "2026-05-02",
+        count: 5,
+      },
+
+      {
+        date: "2026-05-03",
+        count: 3,
+      },
+
+      {
+        date: "2026-05-04",
+        count: 7,
+      },
+
+      {
+        date: "2026-05-05",
+        count: 4,
+      },
+    ],
+  };
+}
 
       // ================= LEETCODE =================
 
