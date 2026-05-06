@@ -6,97 +6,174 @@ import StreakAlert from "../components/StreakAlert";
 import "./DashboardPage.css";
 
 function DashboardPage() {
+
   const navigate = useNavigate();
 
-  const [usernames, setUsernames] = useState({
-    github: "",
-    leetcode: "",
-    codeforces: "",
-  });
+  const [usernames, setUsernames] =
+    useState({
+      github: "",
+      leetcode: "",
+      codeforces: "",
+    });
 
-  const [platformData, setPlatformData] = useState({});
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [platformData, setPlatformData] =
+    useState({});
+
+  const [loading, setLoading] =
+    useState(false);
+
+  const [error, setError] =
+    useState("");
 
   const platforms = [
-    { key: "github", name: "GitHub" },
-    { key: "leetcode", name: "LeetCode" },
-    { key: "codeforces", name: "Codeforces" },
+    {
+      key: "github",
+      name: "GitHub",
+    },
+
+    {
+      key: "leetcode",
+      name: "LeetCode",
+    },
+
+    {
+      key: "codeforces",
+      name: "Codeforces",
+    },
   ];
 
-  useEffect(() => {
-    const saved = localStorage.getItem("usernames");
+  // ================= LOAD SAVED DATA =================
 
-    if (saved) {
-      setUsernames(JSON.parse(saved));
+  useEffect(() => {
+
+    const savedUsernames =
+      localStorage.getItem(
+        "usernames"
+      );
+
+    if (savedUsernames) {
+
+      setUsernames(
+        JSON.parse(savedUsernames)
+      );
+
     }
 
     const savedPlatformData =
-      localStorage.getItem("platformData");
+      localStorage.getItem(
+        "platformData"
+      );
 
     if (savedPlatformData) {
-      setPlatformData(JSON.parse(savedPlatformData));
+
+      setPlatformData(
+        JSON.parse(savedPlatformData)
+      );
+
     }
+
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem(
-      "usernames",
-      JSON.stringify(usernames)
-    );
-  }, [usernames]);
+  // ================= HANDLE INPUT CHANGE =================
 
-  const handleChange = (key, value) => {
-    setUsernames((prev) => ({
-      ...prev,
+  const handleChange = (
+    key,
+    value
+  ) => {
+
+    const updatedUsernames = {
+
+      ...usernames,
+
       [key]: value,
-    }));
-  };
-
-  const handleRedirect = (platformKey) => {
-    const urls = {
-      github: `https://github.com/${usernames.github}`,
-      leetcode: `https://leetcode.com/${usernames.leetcode}`,
-      codeforces: `https://codeforces.com/profile/${usernames.codeforces}`,
     };
 
-    const url = urls[platformKey];
+    setUsernames(
+      updatedUsernames
+    );
 
-    if (url && usernames[platformKey]) {
-      window.open(url, "_blank");
+    localStorage.setItem(
+      "usernames",
+      JSON.stringify(
+        updatedUsernames
+      )
+    );
+  };
+
+  // ================= REDIRECT =================
+
+  const handleRedirect = (
+    platformKey
+  ) => {
+
+    const urls = {
+
+      github:
+        `https://github.com/${usernames.github}`,
+
+      leetcode:
+        `https://leetcode.com/${usernames.leetcode}`,
+
+      codeforces:
+        `https://codeforces.com/profile/${usernames.codeforces}`,
+    };
+
+    const url =
+      urls[platformKey];
+
+    if (
+      url &&
+      usernames[platformKey]
+    ) {
+
+      window.open(
+        url,
+        "_blank"
+      );
+
     }
   };
 
-  // ================= FETCH REAL DATA =================
+  // ================= FETCH DATA =================
 
   const fetchAll = async () => {
+
     setLoading(true);
+
     setError("");
 
     try {
+
       const newData = {};
 
       // ================= GITHUB =================
 
       if (usernames.github) {
-        const githubRes = await fetch(
-          `https://api.github.com/users/${usernames.github}`
-        );
 
-        const githubData = await githubRes.json();
+        const githubRes =
+          await fetch(
+            `https://api.github.com/users/${usernames.github}`
+          );
+
+        const githubData =
+          await githubRes.json();
 
         newData.github = {
+
           publicRepos:
-            githubData.public_repos || 0,
+            githubData.public_repos ||
+            0,
 
           followers:
-            githubData.followers || 0,
+            githubData.followers ||
+            0,
 
           heatmap: [
             {
-              date: new Date()
-                .toISOString()
-                .split("T")[0],
+              date:
+                new Date()
+                  .toISOString()
+                  .split("T")[0],
 
               count: 5,
             },
@@ -107,120 +184,214 @@ function DashboardPage() {
       // ================= LEETCODE =================
 
       if (usernames.leetcode) {
-        const lcRes = await fetch(
-          `https://leetcode-api-faisalshohag.vercel.app/${usernames.leetcode}`
-        );
 
-        const lcData = await lcRes.json();
+        let apiUrl = "";
+
+        // LOCALHOST
+
+        if (
+          window.location
+            .hostname ===
+          "localhost"
+        ) {
+
+          apiUrl =
+            `https://leetcode-api-faisalshohag.vercel.app/${usernames.leetcode}`;
+
+        }
+
+        // VERCEL
+
+        else {
+
+          apiUrl =
+            `/api/leetcode?username=${usernames.leetcode}`;
+
+        }
+
+        const lcRes =
+          await fetch(
+            apiUrl
+          );
+
+        const lcData =
+          await lcRes.json();
 
         newData.leetcode = {
+
           totalSolved:
-            lcData.totalSolved || 0,
+            lcData.totalSolved ||
+            0,
 
           easySolved:
-            lcData.easySolved || 0,
+            lcData.easySolved ||
+            0,
 
           mediumSolved:
-            lcData.mediumSolved || 0,
+            lcData.mediumSolved ||
+            0,
 
           hardSolved:
-            lcData.hardSolved || 0,
+            lcData.hardSolved ||
+            0,
         };
       }
 
-// ================= CODEFORCES =================
+      // ================= CODEFORCES =================
 
-if (usernames.codeforces) {
+      if (
+        usernames.codeforces
+      ) {
 
-  // USER INFO
-  const cfRes = await fetch(
-    `https://codeforces.com/api/user.info?handles=${usernames.codeforces}`
-  );
+        // USER INFO
 
-  const cfJson = await cfRes.json();
+        const cfRes =
+          await fetch(
+            `https://codeforces.com/api/user.info?handles=${usernames.codeforces}`
+          );
 
-  const user = cfJson.result[0];
+        const cfJson =
+          await cfRes.json();
 
-  // USER SUBMISSIONS
-  const subRes = await fetch(
-    `https://codeforces.com/api/user.status?handle=${usernames.codeforces}`
-  );
+        const user =
+          cfJson.result[0];
 
-  const subJson = await subRes.json();
+        // USER SUBMISSIONS
 
-  // COUNT UNIQUE SOLVED PROBLEMS
-  const solvedSet = new Set();
+        const subRes =
+          await fetch(
+            `https://codeforces.com/api/user.status?handle=${usernames.codeforces}`
+          );
 
-  subJson.result.forEach((sub) => {
-    if (sub.verdict === "OK") {
-      solvedSet.add(
-        `${sub.problem.contestId}-${sub.problem.index}`
-      );
-    }
-  });
+        const subJson =
+          await subRes.json();
 
-  newData.codeforces = {
-    rating: user.rating || 0,
+        // UNIQUE SOLVED
 
-    solved: solvedSet.size || 0,
+        const solvedSet =
+          new Set();
 
-    todaySubmissions: subJson.result.filter(
-      (sub) => {
-        const today =
-          new Date().toDateString();
+        subJson.result.forEach(
+          (sub) => {
 
-        return (
-          new Date(
-            sub.creationTimeSeconds * 1000
-          ).toDateString() === today
+            if (
+              sub.verdict ===
+              "OK"
+            ) {
+
+              solvedSet.add(
+                `${sub.problem.contestId}-${sub.problem.index}`
+              );
+
+            }
+          }
         );
+
+        newData.codeforces = {
+
+          rating:
+            user.rating || 0,
+
+          solved:
+            solvedSet.size ||
+            0,
+
+          todaySubmissions:
+            subJson.result.filter(
+              (sub) => {
+
+                const today =
+                  new Date().toDateString();
+
+                return (
+                  new Date(
+                    sub.creationTimeSeconds *
+                      1000
+                  ).toDateString() ===
+                  today
+                );
+              }
+            ).length,
+        };
       }
-    ).length,
-  };
-}
 
       // ================= SAVE DATA =================
 
-      setPlatformData(newData);
+      setPlatformData(
+        newData
+      );
 
       localStorage.setItem(
         "platformData",
-        JSON.stringify(newData)
+        JSON.stringify(
+          newData
+        )
       );
 
       // ================= STREAK =================
 
-      const today = new Date()
-        .toISOString()
-        .split("T")[0];
+      const today =
+        new Date()
+          .toISOString()
+          .split("T")[0];
 
       let streakData = {
+
         count: 1,
+
         lastDate: today,
       };
 
       const savedStreak =
-        localStorage.getItem("grindmapStreak");
+        localStorage.getItem(
+          "grindmapStreak"
+        );
 
-      if (savedStreak) {
-        const parsed = JSON.parse(savedStreak);
+      if (
+        savedStreak
+      ) {
 
-        if (parsed.lastDate !== today) {
+        const parsed =
+          JSON.parse(
+            savedStreak
+          );
+
+        if (
+          parsed.lastDate !==
+          today
+        ) {
+
           streakData.count =
-            (parsed.count || 0) + 1;
-        } else {
-          streakData.count = parsed.count;
+            (parsed.count || 0) +
+            1;
+
+        }
+
+        else {
+
+          streakData.count =
+            parsed.count;
         }
       }
 
       localStorage.setItem(
         "grindmapStreak",
-        JSON.stringify(streakData)
+        JSON.stringify(
+          streakData
+        )
       );
 
-      navigate("/platforms");
-    } catch (err) {
-      console.error(err);
+      navigate(
+        "/platforms"
+      );
+
+    }
+
+    catch (err) {
+
+      console.error(
+        err
+      );
 
       setError(
         "Failed to fetch platform data"
@@ -233,87 +404,148 @@ if (usernames.codeforces) {
   // ================= STATS =================
 
   const totalSolved =
-    (platformData.leetcode?.totalSolved || 0) +
-    (platformData.codeforces?.solved || 0);
 
-  const totalProblems = 4000;
+    (platformData.leetcode
+      ?.totalSolved || 0) +
 
-  const todayISO = new Date()
-    .toISOString()
-    .split("T")[0];
+    (platformData.codeforces
+      ?.solved || 0);
+
+  const totalProblems =
+    4000;
+
+  const todayISO =
+    new Date()
+      .toISOString()
+      .split("T")[0];
 
   const todayGithubActivity =
-    platformData.github?.heatmap?.find(
-      (d) => d.date === todayISO
-    )?.count || 0;
+
+    platformData.github
+      ?.heatmap?.find(
+        (d) =>
+          d.date ===
+          todayISO
+      )?.count || 0;
 
   const todayCodeforces =
+
     platformData.codeforces
       ?.todaySubmissions || 0;
 
   return (
+
     <div className="dashboard-page">
+
       <StreakAlert />
 
-      <h1>Dashboard</h1>
+      <h1>
+        Dashboard
+      </h1>
 
       {/* ================= USERNAME INPUTS ================= */}
 
       <div className="username-inputs">
-        <h2>Enter Usernames</h2>
 
-        {platforms.map((plat) => (
-          <div
-            key={plat.key}
-            className="input-group"
-          >
-            <label>{plat.name}</label>
+        <h2>
+          Enter Usernames
+        </h2>
 
-            <input
-              type="text"
-              value={usernames[plat.key]}
-              onChange={(e) =>
-                handleChange(
-                  plat.key,
-                  e.target.value
-                )
-              }
-              placeholder={`Enter ${plat.name} username`}
-            />
-          </div>
-        ))}
+        {platforms.map(
+          (plat) => (
+
+            <div
+              key={plat.key}
+              className="input-group"
+            >
+
+              <label>
+                {plat.name}
+              </label>
+
+              <input
+                type="text"
+
+                value={
+                  usernames[
+                    plat.key
+                  ]
+                }
+
+                onChange={(e) =>
+                  handleChange(
+                    plat.key,
+                    e.target.value
+                  )
+                }
+
+                placeholder={`Enter ${plat.name} username`}
+              />
+
+            </div>
+          )
+        )}
 
         <button
           onClick={fetchAll}
-          disabled={loading}
+          disabled={
+            loading
+          }
         >
+
           {loading
             ? "Loading..."
             : "Fetch All Platforms"}
+
         </button>
 
         {error && (
-          <p className="error">{error}</p>
+
+          <p className="error">
+
+            {error}
+
+          </p>
+
         )}
+
       </div>
 
       {/* ================= TODAY ACTIVITY ================= */}
 
       <TodayActivity
-        github={todayGithubActivity}
-        leetcode={
-          platformData.leetcode?.totalSolved || 0
+
+        github={
+          todayGithubActivity
         }
-        codeforces={todayCodeforces}
-        onRedirect={handleRedirect}
+
+        leetcode={
+          platformData.leetcode
+            ?.totalSolved || 0
+        }
+
+        codeforces={
+          todayCodeforces
+        }
+
+        onRedirect={
+          handleRedirect
+        }
       />
 
       {/* ================= PROBLEM STATS ================= */}
 
       <ProblemStats
-        solved={totalSolved}
-        total={totalProblems}
+
+        solved={
+          totalSolved
+        }
+
+        total={
+          totalProblems
+        }
       />
+
     </div>
   );
 }
