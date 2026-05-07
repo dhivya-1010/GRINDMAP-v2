@@ -252,6 +252,33 @@ if (usernames.codeforces) {
         "platformData",
         JSON.stringify(newData)
       );
+      await fetch(
+
+  "http://localhost:3001/api/users/save",
+
+  {
+
+    method: "POST",
+
+    headers: {
+
+      "Content-Type":
+        "application/json",
+    },
+
+    body: JSON.stringify({
+
+      github:
+        usernames.github,
+
+      leetcode:
+        usernames.leetcode,
+
+      codeforces:
+        usernames.codeforces,
+    }),
+  }
+);
 
       // ================= STREAK =================
 

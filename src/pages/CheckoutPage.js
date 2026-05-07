@@ -29,27 +29,19 @@ function CheckoutPage() {
         email
       );
 
+      // STREAK BREAK MAIL 😭🔥
+
       await sendStreakMail(
 
         "Dhivya",
 
         email,
 
-        localStorage.getItem(
-          "grindmapStreak"
-        )
-
-          ? JSON.parse(
-              localStorage.getItem(
-                "grindmapStreak"
-              )
-            ).count
-
-          : 0
+        "You missed today's grind 😭 Your LeetCode streak is broken 🔥"
       );
 
       alert(
-        "Reminder feature activated 🔥"
+        "Streak break mail sent 😭🔥"
       );
     };
 
@@ -65,7 +57,7 @@ function CheckoutPage() {
 
         <p>
           Get reminder emails when
-          you miss your streak.
+          your streak breaks 😭
         </p>
 
         <input
