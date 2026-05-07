@@ -142,107 +142,143 @@ function DashboardPage() {
 
       if (usernames.github) {
 
-  const githubRes =
-    await fetch(
+        const githubRes =
+          await fetch(
+            `https://api.github.com/users/${usernames.github}`
+          );
 
-      `http://localhost:3001/api/github/${usernames.github}`
-    );
+        const githubData =
+          await githubRes.json();
 
-  const githubData =
-    await githubRes.json();
+        newData.github = {
 
-  newData.github = {
+          publicRepos:
+            githubData.public_repos ||
+            0,
 
-    publicRepos:
-      githubData.publicRepos || 0,
+          followers:
+            githubData.followers ||
+            0,
 
-    followers:
-      githubData.followers || 0,
+          heatmap: [
+            {
+              date:
+                new Date()
+                  .toISOString()
+                  .split("T")[0],
 
-    heatmap: [
-
-      {
-        date: "2026-05-01",
-        count: 2,
-      },
-
-      {
-        date: "2026-05-02",
-        count: 5,
-      },
-
-      {
-        date: "2026-05-03",
-        count: 3,
-      },
-
-      {
-        date: "2026-05-04",
-        count: 7,
-      },
-
-      {
-        date: "2026-05-05",
-        count: 4,
-      },
-    ],
-  };
-}
+              count: 5,
+            },
+          ],
+        };
+      }
 
       // ================= LEETCODE =================
 
-if (usernames.leetcode) {
+      if (usernames.leetcode) {
 
-  const lcRes =
-    await fetch(
+        const lcRes =
+          await fetch(
+            `https://leetcode-api-faisalshohag.vercel.app/${usernames.leetcode}`
+          );
 
-      `http://localhost:3001/api/leetcode/${usernames.leetcode}`
-    );
+        const lcData =
+          await lcRes.json();
 
-  const lcData =
-    await lcRes.json();
+        newData.leetcode = {
 
-  newData.leetcode = {
+          totalSolved:
+            lcData.totalSolved ||
+            0,
 
-    totalSolved:
-      lcData.totalSolved || 0,
+          easySolved:
+            lcData.easySolved ||
+            0,
 
-    easySolved:
-      lcData.easySolved || 0,
+          mediumSolved:
+            lcData.mediumSolved ||
+            0,
 
-    mediumSolved:
-      lcData.mediumSolved || 0,
-
-    hardSolved:
-      lcData.hardSolved || 0,
-  };
-}
+          hardSolved:
+            lcData.hardSolved ||
+            0,
+        };
+      }
 
       // ================= CODEFORCES =================
 
-if (usernames.codeforces) {
+      if (usernames.codeforces) {
 
-  const cfRes =
-    await fetch(
+        // USER INFO
 
-      `http://localhost:3001/api/codeforces/${usernames.codeforces}`
-    );
+        const cfRes =
+          await fetch(
+            `https://codeforces.com/api/user.info?handles=${usernames.codeforces}`
+          );
 
-  const cfData =
-    await cfRes.json();
+        const cfJson =
+          await cfRes.json();
 
-  newData.codeforces = {
+        const user =
+          cfJson.result[0];
 
-    rating:
-      cfData.rating || 0,
+        // USER SUBMISSIONS
 
-    solved:
-      cfData.solved || 0,
+        const subRes =
+          await fetch(
+            `https://codeforces.com/api/user.status?handle=${usernames.codeforces}`
+          );
 
-    todaySubmissions:
-      cfData.todaySubmissions || 0,
-  };
-}
+        const subJson =
+          await subRes.json();
+
+        // UNIQUE SOLVED
+
+        const solvedSet =
+          new Set();
+
+        subJson.result.forEach(
+          (sub) => {
+
+            if (
+              sub.verdict ===
+              "OK"
+            ) {
+
+              solvedSet.add(
+                `${sub.problem.contestId}-${sub.problem.index}`
+              );
+
+            }
+          }
+        );
+
+        newData.codeforces = {
+
+          rating:
+            user.rating || 0,
+
+          solved:
+            solvedSet.size || 0,
+
+          todaySubmissions:
+            subJson.result.filter(
+              (sub) => {
+
+                const today =
+                  new Date().toDateString();
+
+                return (
+                  new Date(
+                    sub.creationTimeSeconds *
+                      1000
+                  ).toDateString() ===
+                  today
+                );
+              }
+            ).length,
+        };
+      }
 
       // ================= SAVE =================
 
